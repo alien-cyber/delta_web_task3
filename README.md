@@ -1,4 +1,7 @@
 After cloning the repo 
+
+put your mongodb_url string in example.env and rename it as .env
+
 ```bash
 cd delta_web_task3
 ```
