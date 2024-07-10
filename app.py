@@ -5,7 +5,7 @@ from dotenv import load_dotenv,find_dotenv
 import os
 from dotenv import load_dotenv,find_dotenv
 
-
+load_dotenv(find_dotenv())
 app = Flask(__name__)
 app.secret_key = '123456789'  
 CORS(app)
