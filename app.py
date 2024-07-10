@@ -1,6 +1,9 @@
 from flask import Flask, render_template, request, session, url_for, redirect, jsonify
 from flask_cors import CORS
 from pymongo import MongoClient
+from dotenv import load_dotenv,find_dotenv
+import os
+from dotenv import load_dotenv,find_dotenv
 
 
 app = Flask(__name__)
@@ -8,8 +11,8 @@ app.secret_key = '123456789'
 CORS(app)
 
 
-
-client = MongoClient('mongodb://localhost/?directConnection=true&serverSelectionTimeoutMS=2000&appName=mongosh+2.2.10')
+mongo_url=os.getenv("mongo_url")
+client = MongoClient(mongo_url)
 db = client.flask_db
 db.users.insert_one({"dummy": "data"})
 db.users.delete_one({"dummy": "data"})
