@@ -60,7 +60,7 @@ def signup():
         password = request.form['password']
         username = request.form['username']
         myquery = { "email": email }
-        mydoc = likes.find_one(myquery)
+        mydoc = users.find_one(myquery)
         
         if mydoc:
             msg="Email Already Exist"
@@ -68,7 +68,7 @@ def signup():
         else:
             msg="Signup Success"
             mydict = { "username": username, "email": email,"password":password }
-            likes.insert_one(mydict)
+            users.insert_one(mydict)
 
             return redirect(url_for('login'))
 
