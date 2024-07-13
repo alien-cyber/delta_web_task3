@@ -269,6 +269,7 @@
   #playlist li .song-details {
     font-size: 1em;
     flex: 1;
+    color: #808000;
   }
   ::-webkit-scrollbar {
     display: none;
