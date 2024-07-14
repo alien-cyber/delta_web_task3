@@ -13,4 +13,4 @@ pip install -r requirements.txt
 python app.py
 ```
 
-open localhost:5000 in browser and you can see login page;
+open localhost:5000 in MOZILLA FIREFOX and you can see login page;
