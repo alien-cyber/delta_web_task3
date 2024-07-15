@@ -13,4 +13,4 @@ pip install -r requirements.txt
 python app.py
 ```
 
-open <a href="http://127.0.0.1:5000/" target="_blank">[My GitHub Profile](http://127.0.0.1:5000/)</a> and you can see login page;
+open <a href="http://127.0.0.1:5000/" target="_blank">http://127.0.0.1:5000/</a> and you can see login page;
