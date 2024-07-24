@@ -145,11 +145,12 @@ def playlist():
 
 @app.route('/create_playlist', methods=['POST'])
 def create_playlist():
+
     data = request.get_json()
     email=session['email']
     name = data['c_playlist']
     img=data['upload_image']
-    mydict = { "name": name, "email": email,"image":img }
+    mydict = { "name": name, "email": email,"image":img,'duration':0 }
     playlists_name.insert_one(mydict)
   
     return jsonify({'message':'got it'})
@@ -181,19 +182,27 @@ def add_song():
     url=selected_playlists['url']
     img_url=selected_playlists['img']
     songname=selected_playlists['name']
-    
+   
 
 
 
     for name in selected_playlists:
         if name!='url':
             if name!='img':
-                myquery = {'email':email,'url':url,'image':img_url,'playlist_name':name,'songname':songname}
-                playlists.insert_one(myquery)
+                if name!='name':
+                    if name!='duration':
+                        query={'email':email,'name':name}
+                        names_cursor = playlists_name.find(query)
+                        duration=list(names_cursor)[0]['duration']+int(selected_playlists['duration'])
+                        print("duration:",duration)
+                        newvalues = { "$set": { "duration": duration } }
+                        playlists_name.update_one(query, newvalues)
+                        myquery = {'email':email,'url':url,'image':img_url,'playlist_name':name,'songname':songname}
+                        playlists.insert_one(myquery)
                 
    
 
-    clean()
+    
     return jsonify({'message':'got it'})
 
 
@@ -267,12 +276,7 @@ def songs():
     return jsonify({'cursor':filtered,'name':name,'image':img})
 
 
-def clean():
-    session.pop('imgurl', None) 
-    session.pop('songname', None)  
 
-    
-    return 
 
 if __name__ == '__main__':
     app.run(debug=True)
