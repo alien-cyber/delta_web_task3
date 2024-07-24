@@ -178,7 +178,9 @@ document.getElementById('logout').addEventListener('click', function() {
                 },
                 body: JSON.stringify(data)
             });
+              if (document.getElementById('name_playlist').innerHTML=='liked_songs'){
             listItem.remove();
+    }
     
             
   };
