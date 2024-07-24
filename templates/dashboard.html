@@ -16,9 +16,7 @@
     <div class="container">
         <div class="sidebar">
             <div class="sidehead">
-                 <img id="audioPlayerimg" src="{{ url_for('static', filename='musicimage.png') }}" width="100%" height="240" />
-
-              
+                <img id="audioPlayerimg" src="{{ url_for('static', filename='musicimage.png') }}" width="100%" height="240" />
                 <audio class="audioPlayer" id="audioPlayer" controls>
                     Your browser does not support the audio element.
                 </audio>
@@ -68,6 +66,8 @@ align-items: center;">
   <div id="url_holder" style="display: none;"></div>
   <div id="img_url_holder" style="display: none;"></div>
   <div id="name_holder" style="display: none;"></div>
+  <div id="duration_holder" style="display: none;"></div>
+
 
 
   <div style=" display: flex;flex-direction: column;" class="pl.playlist_checkbox" id="playlist_checkbox">
@@ -79,7 +79,6 @@ align-items: center;">
 
 <button class="button-30" style="background-color: rgb(187, 196, 31);" type="button" onclick="c_popup()">create playlist</button>
   <div><button class="button-30"  style="margin-top: 10px;margin-left: 34px;background-color: aqua;" onclick="closepopup()" type="submit">Submit</button></div>
-
 
   </form>
 </div>
@@ -170,6 +169,8 @@ document.getElementById('add_song').addEventListener('submit', async function (e
   jsonData['img']=img_url;
   let name=name_holder.value;
   jsonData['name']=name;
+  let duration=duration_holder.value;
+  jsonData['duration']=duration;
 
  
 
@@ -220,24 +221,27 @@ function toBase64(file) {
         const img_url_holder= document.getElementById('img_url_holder')
     
         const name_holder= document.getElementById('name_holder')
+        const duration_holder= document.getElementById('duration_holder')
+
 
         const modal=document.getElementById('modal');
         const popup_overlay=document.getElementById('popup_overlay');
         const c_modal=document.getElementById('c_modal');
         const c_popup_overlay=document.getElementById('c_popup_overlay');
        
-        function popup(url,img,name){
+        function popup(url,img,name,duration){
            
                 url_holder.value=url;
                 img_url_holder.value=img;
                name_holder.value=name;
+               duration_holder.value=duration;
 
               
           
             const message_container=document.getElementById('popup');
             const playlist_checkbox = document.getElementById("playlist_checkbox");
             playlist_checkbox.innerHTML = "";
-            let  response= fetch('http://127.0.0.1:5000/get_names', {
+            let  response= fetch('https://5000-aliencyber-deltawebtask-x8t3zdx415q.ws-us115.gitpod.io/get_names', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -308,6 +312,7 @@ function toBase64(file) {
       playlist.innerHTML = "";
       for (const song of songData.data.results) {
         const songName = song.name;
+        const duration=song.duration;
         const artistName = song.artists.primary.map(artist => artist.name).join(", ");
         const highestQualityDownloadUrl = song.downloadUrl.find(
           (downloadUrl) => downloadUrl.quality === "320kbps"
@@ -321,7 +326,7 @@ function toBase64(file) {
                "url":highestQualityDownloadUrl.url,
             };
     let count=0
-      let  response= fetch('http://127.0.0.1:5000/get_count', {
+      let  response= fetch('https://5000-aliencyber-deltawebtask-x8t3zdx415q.ws-us115.gitpod.io/get_count', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -340,7 +345,7 @@ function toBase64(file) {
               <p class='song-details'>By ${artistName}</p>  
             </div>
           </span>
-              <button class="button-30" onclick="popup('${highestQualityDownloadUrl.url}','${image150x150.url}','${songName}')" role="button">Add to playlist </button>
+              <button class="button-30" onclick="popup('${highestQualityDownloadUrl.url}','${image150x150.url}','${songName}','${duration}')" role="button">Add to playlist </button>
 
           <button id='${highestQualityDownloadUrl.url}' style='color:${color};'   onClick= "toggle('${highestQualityDownloadUrl.url}','${image150x150.url}','${songName}')" class="btn">${count} <i class="fas fa-heart"></i></button>
         </li>`;
@@ -382,7 +387,7 @@ function toBase64(file) {
                'name':name,
             };
 
-           let  response= fetch('http://127.0.0.1:5000/like_update', {
+           let  response= fetch('https://5000-aliencyber-deltawebtask-x8t3zdx415q.ws-us115.gitpod.io/like_update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
