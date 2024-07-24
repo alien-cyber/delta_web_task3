@@ -70,7 +70,7 @@
 document.getElementById('logout').addEventListener('click', function() {
             window.location.href = '/logout'; 
         });
-               let  response= fetch('http://127.0.0.1:5000/get_playlists', {
+               let  response= fetch('https://5000-aliencyber-deltawebtask-x8t3zdx415q.ws-us115.gitpod.io/get_playlists', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -81,6 +81,10 @@ document.getElementById('logout').addEventListener('click', function() {
               
                console.log(data['names']);
                for (doc in data['names']){
+                var duration=data['names'][doc]['duration'];
+                var minutes = (duration % (60 * 60*10))/60;
+                minutes=Math.round(minutes*100)/100
+               
                 if(data['names'][doc]['image']){
                   img=data['names'][doc]['image'];
                 }
@@ -94,8 +98,13 @@ document.getElementById('logout').addEventListener('click', function() {
             <div class="song-info">
               <p class='song-title'>${data['names'][doc]['name']}</p>
               
+              
+
+
+              
             </div>
           </span>
+          <button class="button-30"  role="presentation">${minutes} Minutes </button>
          
         </li>`;
       }
@@ -110,7 +119,7 @@ document.getElementById('logout').addEventListener('click', function() {
 
   const playSong = (songname) => {
     
-   let response=fetch('http://127.0.0.1:5000/get_songs', {
+   let response=fetch('https://5000-aliencyber-deltawebtask-x8t3zdx415q.ws-us115.gitpod.io/get_songs', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -120,7 +129,7 @@ document.getElementById('logout').addEventListener('click', function() {
             .then(data => {
              console.log(data);
               
-window.location.href = 'http://127.0.0.1:5000/play_songs';
+window.location.href = 'https://5000-aliencyber-deltawebtask-x8t3zdx415q.ws-us115.gitpod.io/play_songs';
 
            });
        
