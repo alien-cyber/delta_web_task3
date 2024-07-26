@@ -241,7 +241,7 @@ function toBase64(file) {
             const message_container=document.getElementById('popup');
             const playlist_checkbox = document.getElementById("playlist_checkbox");
             playlist_checkbox.innerHTML = "";
-            let  response= fetch('https://5000-aliencyber-deltawebtask-x8t3zdx415q.ws-us115.gitpod.io/get_names', {
+            let  response= fetch('http://127.0.0.1:5000/get_names', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -326,7 +326,7 @@ function toBase64(file) {
                "url":highestQualityDownloadUrl.url,
             };
     let count=0
-      let  response= fetch('https://5000-aliencyber-deltawebtask-x8t3zdx415q.ws-us115.gitpod.io/get_count', {
+      let  response= fetch('http://127.0.0.1:5000/get_count', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -387,7 +387,7 @@ function toBase64(file) {
                'name':name,
             };
 
-           let  response= fetch('https://5000-aliencyber-deltawebtask-x8t3zdx415q.ws-us115.gitpod.io/like_update', {
+           let  response= fetch('http://127.0.0.1:5000/like_update', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
