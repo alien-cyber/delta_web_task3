@@ -35,7 +35,7 @@
             <div class="searchBar">
               <h2>Your Playlists</h2>
             </div>
-            <button class="button_62" id="logout" role="button">LOG OUT</button>
+        
 
            
             
@@ -67,9 +67,7 @@
 </div>
 
 <script>
-document.getElementById('logout').addEventListener('click', function() {
-            window.location.href = '/logout'; 
-        });
+
                let  response= fetch('http://127.0.0.1:5000/get_playlists', {
                 method: 'POST',
                 headers: {
