@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/dashboard.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <title>Dashboard</title>
+  
+       
+</head>
+<body style="overflow: hidden">
+    <div>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidehead">
+                <img id="audioPlayerimg" src="{{ url_for('static', filename='musicimage.png') }}" width="100%" height="240" />
+                <audio class="audioPlayer" id="audioPlayer" controls>
+                    Your browser does not support the audio element.
+                </audio>
+                <hr style="margin: 5px 0; border: 1px solid #aaa;" />
+                <button class="button_62" id='playlist_songs'  role="button">Playlist</button>
+            </div>
+            <div class="sidebody"></div>
+        </div>
+        <div class="data">
+            <div style="display: flex;align-items: center;justify-content: space-between;">
+            <div class="searchBar">
+                <i class="fas fa-search"></i>
+                <input   style="font-size: medium;" placeholder="After Entering songname type Enter" onchange="searchSongs()" id="Search" name="searchBar" type="text" />
+                
+             </div>
+            
+            <button class="button_62" id="logout" role="button">LOG OUT</button>
+        </div>
+            
+            <hr style="margin: 5px 0; border: 1px solid #aaa;" />
+            
+            <div class="body">
+               
+                <div id="root"></div>
+                <ul id="playlist" class="list-group"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal " id="modal">
+
+  <div class="modal-header">
+    
+    <h2>Add to... </h2>
+    
+    <button  class="close-button" onclick="closepopup()">&times;</button>
+ 
+</div>
+
+
+<div id="popup" style="display: flex;justify-content: center;
+align-items: center;">
+
+
+
+<form id="add_song"  method="POST">
+  <div id="url_holder" style="display: none;"></div>
+  <div id="img_url_holder" style="display: none;"></div>
+  <div id="name_holder" style="display: none;"></div>
+  <div id="duration_holder" style="display: none;"></div>
+
+
+
+  <div style=" display: flex;flex-direction: column;" class="pl.playlist_checkbox" id="playlist_checkbox">
+  
+       
+     
+
+</div>
+
+<button class="button-30" style="background-color: rgb(187, 196, 31);" type="button" onclick="c_popup()">create playlist</button>
+  <div><button class="button-30"  style="margin-top: 10px;margin-left: 34px;background-color: aqua;" onclick="closepopup()" type="submit">Submit</button></div>
+
+  </form>
+</div>
+  </div>
+  <div  id="popup_overlay" ></div>
+
+
+
+  <div class="modal" id="c_modal">
+    <div class="modal-header">
+      <h2>Create Playlist</h2>
+      <button class="close-button" onclick="c_closepopup()">&times;</button>
+    </div>
+    <form id="create_playlist_form"  method="POST">
+      <label style=" font-weight: bold;margin-left: 10px;">
+        Playlist Name:  
+        <input type="text" id="c_name" name="c_playlist"  placeholder=""/>
+      </label>
+      <div  style="align-items: center;">
+      <div >
+        <input  type="file" accept="image/*" name="upload_image" id="upload_image" onchange="loadFile(event)" style="display: none;">
+        <label style="margin-left: 66px; font-weight: bold; margin-top: 10px;background-color:rgb(28, 198, 70);" class="button-30" for="upload_image" style="cursor: pointer;">Upload Image</label>
+        <img id="output" width="200" />
+      </div>
+      <button class="button-30" style="background-color: violet;margin-left: 81px;margin-bottom: 10px;" type="submit">Submit</button>
+    </form>
+  </div>
+</div>
+  
+    <div  id="c_popup_overlay"></div>
+
+<script>
+     document.getElementById('create_playlist_form').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  
+  const form = e.target;
+  const formData = new FormData(form);
+  
+  const jsonData = {};
+  formData.forEach((value, key) => {
+    if (key !== 'upload_image') { // Exclude file from JSON data
+      jsonData[key] = value;
+    }
+  });
+
+  const fileInput = form.querySelector('input[type="file"]');
+  const file = fileInput.files[0];
+  jsonData.upload_image='';
+  if (file) {
+    jsonData.upload_image = await toBase64(file);
+  }
+
+  fetch('/create_playlist', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(jsonData),
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    form.reset(); // Reset the form to clear all inputs
+    document.getElementById('output').src = '';
+    c_closepopup() 
+  })
+  .catch(error => console.error('Error:', error));
+});
+
+
+
+document.getElementById('add_song').addEventListener('submit', async function (e) {
+  e.preventDefault();
+  
+  const form = e.target;
+  const formData = new FormData(form);
+  
+  const jsonData = {};
+  formData.forEach((value, key) => {
+   
+      jsonData[value] = value;
+    
+  });
+  let url=url_holder.value;
+
+  jsonData['url']=url;
+  let img_url=img_url_holder.value;
+  jsonData['img']=img_url;
+  let name=name_holder.value;
+  jsonData['name']=name;
+  let duration=duration_holder.value;
+  jsonData['duration']=duration;
+
+ 
+
+  fetch('/add_song', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(jsonData),
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    form.reset(); 
+   
+  })
+  .catch(error => console.error('Error:', error));
+});
+
+function loadFile(event) {
+  const output = document.getElementById('output');
+  output.src = URL.createObjectURL(event.target.files[0]);
+}
+
+function toBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = error => reject(error);
+  });
+}
+
+     
+  var loadFile = function(event) {
+        var image = document.getElementById('output');
+        image.src = URL.createObjectURL(event.target.files[0]);
+    };
+         document.getElementById('logout').addEventListener('click', function() {
+            window.location.href = '/logout'; 
+        });
+        document.getElementById('playlist_songs').addEventListener('click', function() {
+            window.location.href = '/playlist'; 
+        });
+
+
+        const url_holder= document.getElementById('url_holder')
+        const img_url_holder= document.getElementById('img_url_holder')
+    
+        const name_holder= document.getElementById('name_holder')
+        const duration_holder= document.getElementById('duration_holder')
+
+
+        const modal=document.getElementById('modal');
+        const popup_overlay=document.getElementById('popup_overlay');
+        const c_modal=document.getElementById('c_modal');
+        const c_popup_overlay=document.getElementById('c_popup_overlay');
+       
+        function popup(url,img,name,duration){
+           
+                url_holder.value=url;
+                img_url_holder.value=img;
+               name_holder.value=name;
+               duration_holder.value=duration;
+
+              
+          
+            const message_container=document.getElementById('popup');
+            const playlist_checkbox = document.getElementById("playlist_checkbox");
+            playlist_checkbox.innerHTML = "";
+            let  response= fetch('http://127.0.0.1:5000/get_names', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'nothing':'nothing'})
+            }).then(response => response.json()) // Parse the JSON from the response
+            .then(data => {
+               console.log(data);
+               
+               for (doc in data['names']){
+           
+               
+               playlist_checkbox.innerHTML+=`
+                <label>
+            <input type="checkbox" id='${data['names'][doc]}' name="playlist_names" value="${data['names'][doc]}">
+    <span class="checkbox">${data['names'][doc]}</span>
+  </label>
+
+           
+    
+    `}
+        
+         });
+            modal.classList.toggle('active');
+            popup_overlay.classList.add('active');
+
+
+
+
+}
+
+    function c_popup(){
+      c_modal.classList.toggle('active');
+        c_popup_overlay.classList.remove('active');
+        modal.classList.toggle('active');
+        popup_overlay.classList.remove('active');
+    }
+       function closepopup(){
+        modal.classList.toggle('active');
+        popup_overlay.classList.remove('active');
+      }
+      function c_closepopup(){
+        c_modal.classList.toggle('active');
+        c_popup_overlay.classList.remove('active');
+        url=url_holder.value;
+        img=img_url_holder.value;
+        name=name_holder.value;
+        popup(url=url,img=img,name=name); 
+
+      }
+
+
+   const searchSongs = async () => {
+    const searchSong = document.getElementById("Search").value.toLowerCase();
+
+    try {
+      const options = {
+        method: 'GET',
+        url: 'https://saavn.dev/api/search/songs',
+        params: { query: searchSong, limit: 8 }
+      };
+      const { data } = await axios.request(options);
+
+      const songData = data;
+      
+
+      const playlist = document.getElementById("playlist");
+      playlist.innerHTML = "";
+      for (const song of songData.data.results) {
+        const songName = song.name;
+        const duration=song.duration;
+        const artistName = song.artists.primary.map(artist => artist.name).join(", ");
+        const highestQualityDownloadUrl = song.downloadUrl.find(
+          (downloadUrl) => downloadUrl.quality === "320kbps"
+        );
+      
+        const image150x150 = song.image.find(
+          (image) => image.quality === "500x500"
+        );
+        const data = {
+                
+               "url":highestQualityDownloadUrl.url,
+            };
+    let count=0
+      let  response= fetch('http://127.0.0.1:5000/get_count', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            }).then(response => response.json()) // Parse the JSON from the response
+            .then(data => {
+               count=data['count']
+               color=data['color']
+    playlist.innerHTML += `
+        <li>
+          <span style="width:90%;" onClick="playSong('${highestQualityDownloadUrl.url}', '${image150x150.url}')" class="list-group-item">
+            <img src="${image150x150.url}" style="width:50px; height:50px; margin-right: 10px;">
+            <div class="song-info">
+              <p class='song-title'>${songName}</p>
+              <p class='song-details'>By ${artistName}</p>  
+            </div>
+          </span>
+              <button class="button-30" onclick="popup('${highestQualityDownloadUrl.url}','${image150x150.url}','${songName}','${duration}')" role="button">Add to playlist </button>
+
+          <button id='${highestQualityDownloadUrl.url}' style='color:${color};'   onClick= "toggle('${highestQualityDownloadUrl.url}','${image150x150.url}','${songName}')" class="btn">${count} <i class="fas fa-heart"></i></button>
+        </li>`;
+        
+         });
+        
+        }
+    } catch (error) {
+      console.error("Error:", error);
+    }
+  };
+  const playSong = (songSrc, songimg) => {
+    const audioPlayer = document.getElementById("audioPlayer");
+    const imageholder = document.getElementById("audioPlayerimg");
+    imageholder.src=songimg
+    audioPlayer.src = songSrc;
+    audioPlayer.play();
+  };
+
+  const toggle = (id,img,name) => {
+    const btn = document.getElementById(id);
+    let buttontext = btn.textContent;
+    let parts = buttontext.split(' ');
+    let count = parseInt(parts[0]);
+
+    if (btn.style.color === "red") {
+      btn.style.color = "grey";
+      count -= 1;
+    } else {
+      btn.style.color = "red";
+      count += 1;
+    }
+
+    btn.innerHTML = `${count} <i class="fas fa-heart"></i>`;
+    const data = {
+                "count":count,
+               "url":id,
+               'image':img,
+               'name':name,
+            };
+
+           let  response= fetch('http://127.0.0.1:5000/like_update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+            
+  };
+    </script> 
+</body>
+</html>
