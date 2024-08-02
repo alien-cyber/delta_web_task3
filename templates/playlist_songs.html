@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/playlist.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.2/css/all.min.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    
+    <title>Playlist</title>
+  
+       
+</head>
+<body style="overflow: hidden">
+    <div>
+    <div class="container">
+        <div class="sidebar">
+            <div class="sidehead">
+                <img id="audioPlayerimg" src="{{ url_for('static', filename='musicimage.png') }}" width="240" height="240" />
+                <audio class="audioPlayer" id="audioPlayer" controls>
+                    Your browser does not support the audio element.
+                </audio>
+                <hr style="margin: 5px 0; border: 1px solid #aaa;" />
+                <button class="button_62" id='playlist_songs' role="button">Dashboard</button>
+                <button class="button_62" id='playlist_menu' role="button">PLaylists</button>
+
+            </div>
+            <div class="sidebody"></div>
+        </div>
+      
+    <div class="data">
+
+               
+            <div style="display: flex;align-items: flex-start;justify-content: space-between;flex-direction: column;">
+                <img id="image_playlist" src="{{ url_for('static', filename='musicimage.png') }}" width="730" height="140" />
+
+            <div class="searchBar">
+              <h2 id="name_playlist">Your Playlists</h2>
+            </div>
+      
+
+           
+            
+           
+        </div>
+        
+     
+            
+            <hr style="margin: 5px 0; border: 1px solid #aaa;" />
+            
+            <div class="body">
+               
+                <div id="root"></div>
+                <ul id="playlist" class="list-group"></ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+  let playlistData = [];
+  let currentSongIndex = 0;
+
+  fetch('http://127.0.0.1:5000/songs', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({'nothing':'nothing'})
+  })
+  .then(response => response.json())
+  .then(data => {
+    console.log(data);
+    playlist.innerHTML = '';
+    playlistData = data['cursor'];
+    let img;
+    if (data['image']){
+      img=data['image']
+    }
+    else{
+      img="{{ url_for('static', filename='Designer.png') }}"
+    }
+    document.getElementById('image_playlist').src=img;
+    
+    document.getElementById('name_playlist').innerHTML=data['name'];
+
+    
+    playlistData.forEach((doc, index) => {
+      let url = doc['url'];
+      let songname = doc['songname'];
+      let image = doc['image'];
+      let  response= fetch('http://127.0.0.1:5000/get_count', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({'url':url})
+            }).then(response => response.json()) // Parse the JSON from the response
+            .then(data => {
+               count=data['count']
+               color=data['color']
+               playlist.innerHTML += `
+        <li>
+          <span style="width:90%;" onClick="playSong(${index})" class="list-group-item">
+            <img src="${image}" style="width:50px; height:50px; margin-right: 10px;">
+            <div class="song-info">
+              <p class='song-title'>${songname}</p>
+            </div>
+          </span>
+          <button id='${url}' style='color:${color};'   onClick= "toggle('${url}','${image}','${songname}')" class="btn">${count} <i class="fas fa-heart"></i></button>
+       
+            
+        </li>`;
+        
+         });
+
+     
+    });
+  });
+
+  document.getElementById('playlist_songs').addEventListener('click', function() {
+    window.location.href = '/dashboard'; 
+  });
+  document.getElementById('playlist_menu').addEventListener('click', function() {
+    window.location.href = '/playlist'; 
+  });
+
+  
+
+  const playSong = (index) => {
+    const audioPlayer = document.getElementById("audioPlayer");
+    const imageholder = document.getElementById("audioPlayerimg");
+    const song = playlistData[index];
+    if (song) {
+      imageholder.src = song['image'];
+      audioPlayer.src = song['url'];
+      audioPlayer.play();
+      currentSongIndex = index;
+    }
+  };
+
+  const playNextSong = () => {
+    currentSongIndex = (currentSongIndex + 1) % playlistData.length;
+    playSong(currentSongIndex);
+  };
+
+  const toggle = (id,img,name) => {
+    const btn = document.getElementById(id);
+    const listItem = btn.parentElement;
+
+    let buttontext = btn.textContent;
+    let parts = buttontext.split(' ');
+    let count = parseInt(parts[0]);
+
+    if (btn.style.color === "red") {
+      btn.style.color = "grey";
+      count -= 1;
+    } else {
+      btn.style.color = "red";
+      count += 1;
+    }
+
+    btn.innerHTML = `${count} <i class="fas fa-heart"></i>`;
+    const data = {
+                "count":count,
+               "url":id,
+               'image':img,
+               'name':name,
+            };
+
+           let  response= fetch('http://127.0.0.1:5000/like_update', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });
+              if (document.getElementById('name_playlist').innerHTML=='liked_songs'){
+            listItem.remove();
+    }
+    
+            
+  };
+
+  document.getElementById('audioPlayer').addEventListener('ended', playNextSong);
+</script>
+
+</body>
+</html>
